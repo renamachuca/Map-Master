@@ -4,7 +4,7 @@ class Nodo:
     def __init__(self, x, y, g=float('inf'), h=0, f=float('inf'), parent=None):
         self.x = x
         self.y = y
-        self.g = g  
+        self.g = g   
         self.h = h  
         self.f = f  
         self.parent = parent  
@@ -60,17 +60,18 @@ class Mapa:
             except ValueError:
                 print("Por favor, ingresa dos números enteros separados por espacio.")
 
+class Ruta:
+    def __init__(self, mapa):
+        self.mapa = mapa
+
     def encontrar_ruta(self, inicio, objetivo):
         nodos_abiertos = []
         nodos_cerrados = []
-
         nodo_inicio = Nodo(inicio[0], inicio[1])
         nodo_objetivo = Nodo(objetivo[0], objetivo[1])
-
         heapq.heappush(nodos_abiertos, nodo_inicio)
         nodo_inicio.g = 0
         nodo_inicio.f = self.calcular_f(nodo_inicio, nodo_objetivo)
-
         while nodos_abiertos:
             nodo_actual = heapq.heappop(nodos_abiertos)
             if nodo_actual == nodo_objetivo:
@@ -89,16 +90,15 @@ class Mapa:
                     vecino.h = self.calcular_f(vecino, nodo_objetivo)
                     vecino.f = vecino.g + vecino.h
                     heapq.heappush(nodos_abiertos, vecino)
-
-        return None  # No se encontró ruta válida
+        return None  
 
     def obtener_vecinos(self, nodo):
         vecinos = []
         direcciones = [(-1, 0), (1, 0), (0, -1), (0, 1)]  
         for dx, dy in direcciones:
             x_vecino, y_vecino = nodo.x + dx, nodo.y + dy
-            if 0 <= x_vecino < self.n_filas and 0 <= y_vecino < self.n_columnas:
-                if self.tablero[x_vecino][y_vecino] != 1:  # No es un obstáculo
+            if 0 <= x_vecino < self.mapa.n_filas and 0 <= y_vecino < self.mapa.n_columnas:
+                if self.mapa.tablero[x_vecino][y_vecino] != 1:  
                     vecino = Nodo(x_vecino, y_vecino)
                     vecinos.append(vecino)
         return vecinos
@@ -109,15 +109,13 @@ class Mapa:
     def construir_camino(self, nodo_final):
         camino = []
         nodo_actual = nodo_final
-
         while nodo_actual is not None:
             camino.append((nodo_actual.x, nodo_actual.y))
             nodo_actual = nodo_actual.parent
-
         return camino[::-1]
 
     def imprimir_tablero_con_ruta(self, ruta, inicio, destino):
-        tablero_con_ruta = [fila[:] for fila in self.tablero]
+        tablero_con_ruta = [fila[:] for fila in self.mapa.tablero]
         tablero_con_ruta[inicio[0]][inicio[1]] = 'i'
         tablero_con_ruta[destino[0]][destino[1]] = 'd'
 
@@ -136,17 +134,16 @@ if __name__ == "__main__":
     n_columnas = 10
 
     mapa = Mapa(n_filas, n_columnas)
-
     mapa.agregar_obstaculo()
     mapa.eliminar_obstaculo()
-
     inicio = mapa.obtener_coordenadas("Ingresa las coordenadas del punto de inicio (x y): ")
     destino = mapa.obtener_coordenadas("Ingresa las coordenadas del punto de destino (x y): ")
 
-    ruta = mapa.encontrar_ruta(inicio, destino)
+    ruta_finder = Ruta(mapa)
+    ruta = ruta_finder.encontrar_ruta(inicio, destino)
 
     if ruta:
         print("Ruta encontrada:")
-        mapa.imprimir_tablero_con_ruta(ruta, inicio, destino)
+        ruta_finder.imprimir_tablero_con_ruta(ruta, inicio, destino)
     else:
         print("No se encontró ruta válida.")
