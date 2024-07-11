@@ -4,10 +4,11 @@ class Nodo:
     def __init__(self, x, y, g=float('inf'), h=0, f=float('inf'), parent=None):
         self.x = x
         self.y = y
-        self.g = g  # Costo acumulado  
-        self.h = h  # Heuristica
-        self.f = f  # Costo total
+        self.g = g  
+        self.h = h  
+        self.f = f  
         self.parent = parent  
+
     def __lt__(self, other):
         return self.f < other.f
 
@@ -32,6 +33,21 @@ class Mapa:
                     self.tablero[x][y] = 1 
                 else:
                     print("Ya hay un obstáculo en esa posición.")
+            except (ValueError, IndexError):
+                print("Coordenadas inválidas. Intenta nuevamente.")
+
+    def eliminar_obstaculo(self):
+        while True:
+            print("Ingresa las coordenadas del obstáculo a eliminar (x y), o 'fin' para terminar:")
+            entrada = input()
+            if entrada.lower() == 'fin':
+                break
+            try:
+                x, y = map(int, entrada.split())
+                if self.tablero[x][y] == 1:
+                    self.tablero[x][y] = 0  
+                else:
+                    print("No hay un obstáculo en esa posición.")
             except (ValueError, IndexError):
                 print("Coordenadas inválidas. Intenta nuevamente.")
 
@@ -65,7 +81,7 @@ class Mapa:
             for vecino in vecinos:
                 if vecino in nodos_cerrados:
                     continue    
-                nuevo_costo_g = nodo_actual.g + 1  # Costo uniforme, todos los movimientos tienen el mismo costo
+                nuevo_costo_g = nodo_actual.g + 1  
 
                 if nuevo_costo_g < vecino.g:
                     vecino.parent = nodo_actual
@@ -78,7 +94,7 @@ class Mapa:
 
     def obtener_vecinos(self, nodo):
         vecinos = []
-        direcciones = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Movimientos arriba, abajo, izquierda, derecha
+        direcciones = [(-1, 0), (1, 0), (0, -1), (0, 1)]  
         for dx, dy in direcciones:
             x_vecino, y_vecino = nodo.x + dx, nodo.y + dy
             if 0 <= x_vecino < self.n_filas and 0 <= y_vecino < self.n_columnas:
@@ -87,22 +103,18 @@ class Mapa:
                     vecinos.append(vecino)
         return vecinos
 
-
     def calcular_f(self, nodo, objetivo):
         return abs(nodo.x - objetivo.x) + abs(nodo.y - objetivo.y)
-
 
     def construir_camino(self, nodo_final):
         camino = []
         nodo_actual = nodo_final
-
 
         while nodo_actual is not None:
             camino.append((nodo_actual.x, nodo_actual.y))
             nodo_actual = nodo_actual.parent
 
         return camino[::-1]
-
 
     def imprimir_tablero_con_ruta(self, ruta, inicio, destino):
         tablero_con_ruta = [fila[:] for fila in self.tablero]
@@ -126,6 +138,7 @@ if __name__ == "__main__":
     mapa = Mapa(n_filas, n_columnas)
 
     mapa.agregar_obstaculo()
+    mapa.eliminar_obstaculo()
 
     inicio = mapa.obtener_coordenadas("Ingresa las coordenadas del punto de inicio (x y): ")
     destino = mapa.obtener_coordenadas("Ingresa las coordenadas del punto de destino (x y): ")
